@@ -1,0 +1,29 @@
+<div class="form-container">
+  <form [formGroup]="loanForm" (ngSubmit)="onSubmit()">
+    <label>First Name:</label>
+    <input type="text" formControlName="firstName" required />
+
+    <label>Middle Name:</label>
+    <input type="text" formControlName="middleName" />
+
+    <label>Last Name:</label>
+    <input type="text" formControlName="lastName" required />
+
+    <label>Loan Amount:</label>
+    <input type="text" formControlName="loanAmount" required />
+
+    <label>Loan Tenure:</label>
+    <input type="text" formControlName="loanTenure" required />
+
+    <label>Loan Type:</label>
+    <select formControlName="loanType" required>
+      <option value="">Select</option>
+      <option value="Home Loan">Home Loan</option>
+      <option value="Personal Loan">Personal Loan</option>
+    </select>
+
+    <button type="submit" [disabled]="!loanForm.valid">Submit</button>
+
+    <button (click)="redirectoFiles()">Get Files</button>
+  </form>
+</div>
