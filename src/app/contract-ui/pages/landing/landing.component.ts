@@ -108,7 +108,7 @@ export class LandingComponent implements OnInit{
           loanType = 'HL';
           break;
         case 'Personal Loan':
-          loanType = 'HL';
+          loanType = 'PL';
           break;
       }
 
