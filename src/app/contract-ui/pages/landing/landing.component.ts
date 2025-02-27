@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiCallService } from '../../services/api-call.service';
+import { SmartApiService } from '../../services/smart-api.service';
 
 declare global {
   interface Window {
@@ -14,12 +15,17 @@ declare global {
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.css',
 })
-export class LandingComponent implements OnInit{
+export class LandingComponent implements OnInit {
   loanForm: FormGroup;
   privateKey: string = '';
   receiverAddress: string = '0x8F9B1E97F6CA00262db581CA66915deABe3181c8';
 
-  constructor(private fb: FormBuilder, private router: Router, private apiService: ApiCallService) {
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private apiService: ApiCallService,
+    private smartApiService: SmartApiService
+  ) {
     this.loanForm = this.fb.group({
       firstName: ['', Validators.required],
       middleName: [''],
@@ -46,7 +52,7 @@ export class LandingComponent implements OnInit{
     });
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     if (typeof window !== 'undefined') {
       this.getMetaMaskPrivateKey();
     }
@@ -55,7 +61,9 @@ export class LandingComponent implements OnInit{
   async getMetaMaskPrivateKey() {
     if (typeof window !== 'undefined' && window.ethereum) {
       try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const accounts = await window.ethereum.request({
+          method: 'eth_requestAccounts',
+        });
         this.privateKey = accounts[0];
         console.log('MetaMask Private Key:', this.privateKey);
       } catch (error) {
@@ -69,13 +77,15 @@ export class LandingComponent implements OnInit{
   async requestTransaction() {
     if (window.ethereum) {
       try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const accounts = await window.ethereum.request({
+          method: 'eth_requestAccounts',
+        });
         const sender = accounts[0];
-        
+
         const transactionParameters = {
           to: this.receiverAddress, // Receiver address from form or fixed value
           from: sender,
-          value: '0x470DE4DF820000', // Sending a fixed amount (0.001 ETH in Wei)
+          value: '0x470DE4DF820000', // Sending a fixed amount (0.02 ETH in Wei)
         };
 
         const txHash = await window.ethereum.request({
@@ -85,14 +95,14 @@ export class LandingComponent implements OnInit{
 
         console.log('Transaction Hash:', txHash);
 
-        return txHash
+        return txHash;
       } catch (error) {
         console.error('Transaction failed:', error);
-        return ""
+        return '';
       }
     } else {
       console.error('MetaMask is not installed');
-      return ""
+      return '';
     }
   }
 
@@ -112,7 +122,11 @@ export class LandingComponent implements OnInit{
       }
 
       let reqBody = {
-        fileName: this.loanForm.get('firstName')?.value + "_" + this.loanForm.get('lastName')?.value + '.html',
+        fileName:
+          this.loanForm.get('firstName')?.value +
+          '_' +
+          this.loanForm.get('lastName')?.value +
+          '.html',
         fileType: 'html',
         fileSize: 10,
         fileDescription: 'Loan Html File',
@@ -124,22 +138,45 @@ export class LandingComponent implements OnInit{
           loanTenure: this.loanForm.get('loanTenure')?.value,
         },
         loanType: loanType,
-        txHash: "",
+        txHash: '',
+      };
+
+      let reqBody2 = {
+        fullName:
+          this.loanForm.get('firstName')?.value + " " +
+          this.loanForm.get('middleName')?.value + " " +
+          this.loanForm.get('lastName')?.value,
+        loanAmount: this.loanForm.get('loanAmount')?.value.toString(),
+        loanTenure: this.loanForm.get('loanTenure')?.value.toString(),
+        loanType: loanType,
+        transactionId: '1231125766',
       };
 
       await this.requestTransaction().then((res) => {
-        if(res && res != "") {
-          reqBody.txHash = res
+        if (res && res != '') {
+          reqBody2.transactionId = res;
 
-          this.apiService.getPostRequest('/uploadFile', reqBody).subscribe((resNew: any) => {
-            console.log(resNew)
+          // this.apiService
+          //   .getPostRequest('/uploadFile', reqBody)
+          //   .subscribe((resNew: any) => {
+          //     console.log(resNew);
 
-            if(resNew && resNew?.fileHash) {
-              prompt("File Generated: ", resNew?.fileHash)
-            }
-          })
+          //     if (resNew && resNew?.fileHash) {
+          //       prompt('File Generated: ', resNew?.fileHash);
+          //     }
+          //   });
+
+          this.apiService
+            .getPostRequest('/checkApi', reqBody2)
+            .subscribe((resNew: any) => {
+              console.log(resNew);
+
+              if (resNew && resNew?.transactionId) {
+                prompt('File Generated: ', resNew?.transactionId);
+              }
+            });
         }
-      })
+      });
     } else {
     }
   }
