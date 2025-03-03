@@ -85,7 +85,7 @@ export class LandingComponent implements OnInit {
         const transactionParameters = {
           to: this.receiverAddress, // Receiver address from form or fixed value
           from: sender,
-          value: '0x16345785D8A0000', // Sending a fixed amount (0.001 ETH in Wei)
+          value: '0x16345785D8A00', // Sending a fixed amount (0.001 ETH in Wei)
         };
 
         const txHash = await window.ethereum.request({
