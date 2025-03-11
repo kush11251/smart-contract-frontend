@@ -1,29 +1,52 @@
+<app-loader></app-loader>
+
 <div class="form-container">
   <h2>Loan Application</h2>
-  <form [formGroup]="loanForm" (ngSubmit)="onSubmit()">
-      <label for="firstName">First Name:</label>
-      <input type="text" id="firstName" formControlName="firstName" required>
+  <form [formGroup]="loanForm">
+    <label for="firstName">First Name:</label>
+    <input type="text" id="firstName" formControlName="firstName" required />
 
-      <label for="middleName">Middle Name:</label>
-      <input type="text" id="middleName" formControlName="middleName">
+    <label for="middleName">Middle Name:</label>
+    <input type="text" id="middleName" formControlName="middleName" />
 
-      <label for="lastName">Last Name:</label>
-      <input type="text" id="lastName" formControlName="lastName" required>
+    <label for="lastName">Last Name:</label>
+    <input type="text" id="lastName" formControlName="lastName" required />
 
-      <label for="loanAmount">Loan Amount:</label>
-      <input type="number" id="loanAmount" formControlName="loanAmount" required>
+    <label for="loanAmount">Loan Amount:</label>
+    <input
+      type="number"
+      id="loanAmount"
+      formControlName="loanAmount"
+      required
+    />
 
-      <label for="loanTenure">Loan Tenure (in years):</label>
-      <input type="number" id="loanTenure" formControlName="loanTenure" required>
+    <label for="loanTenure">Loan Tenure (in years):</label>
+    <input
+      type="number"
+      id="loanTenure"
+      formControlName="loanTenure"
+      required
+    />
 
-      <label for="loanType">Loan Type:</label>
-      <select id="loanType" formControlName="loanType" required>
-          <option value="">Select</option>
-          <option value="Home Loan">Home Loan</option>
-          <option value="Personal Loan">Personal Loan</option>
-      </select>
+    <label for="loanType">Loan Type:</label>
+    <select id="loanType" formControlName="loanType" required>
+      <option value="">Select</option>
+      <option value="Home Loan">Home Loan</option>
+      <option value="Personal Loan">Personal Loan</option>
+    </select>
 
-      <button type="submit" [disabled]="!loanForm.valid">Submit</button>
-      <button type="button" (click)="redirectoFiles()">Get Files</button>
+    <button
+      type="submit"
+      [disabled]="!loanForm.valid || isLoading"
+      (click)="onSubmit()"
+    >
+      <span *ngIf="!isLoading">Submit</span>
+      <span *ngIf="isLoading">
+        <div class="spinner"></div>
+        Loading...
+      </span>
+    </button>
+
+    <button type="button" (click)="redirectoFiles()">Get Files</button>
   </form>
 </div>

@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiCallService } from '../../services/api-call.service';
 import { SmartApiService } from '../../services/smart-api.service';
+import { LoadingService } from '../../service/loading.service';
 
 declare global {
   interface Window {
@@ -19,12 +20,14 @@ export class LandingComponent implements OnInit {
   loanForm: FormGroup;
   privateKey: string = '';
   receiverAddress: string = '0x8F9B1E97F6CA00262db581CA66915deABe3181c8';
+  isLoading = false;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private apiService: ApiCallService,
-    private smartApiService: SmartApiService
+    private smartApiService: SmartApiService,
+    private loadingService: LoadingService
   ) {
     this.loanForm = this.fb.group({
       firstName: ['', Validators.required],
@@ -108,6 +111,10 @@ export class LandingComponent implements OnInit {
 
   async onSubmit() {
     if (this.loanForm.valid) {
+      if (this.isLoading) return;
+
+      this.isLoading = true;
+
       console.log('Form Submitted', this.loanForm.value);
 
       let loanType = '';
@@ -152,6 +159,7 @@ export class LandingComponent implements OnInit {
         transactionId: '1231125766',
       };
 
+      this.loadingService.show();
       await this.requestTransaction().then((res) => {
         if (res && res != '') {
           reqBody2.transactionId = res;
@@ -171,7 +179,11 @@ export class LandingComponent implements OnInit {
             .subscribe((resNew: any) => {
               console.log(resNew);
 
+              this.isLoading = false;
+
               if (resNew && resNew?.transactionId) {
+                this.loadingService.hide();
+
                 prompt('File Generated: ', resNew?.transactionId);
               }
             });

@@ -120,7 +120,7 @@ export class FilesComponent implements OnInit {
       const blob = pdf.output('blob');
       this.checkFileOnPinata(await blob, fileName);
 
-      document.body.removeChild(container);
+      // document.body.removeChild(container);
     });
   }
 }
