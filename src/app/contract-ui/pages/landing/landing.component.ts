@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiCallService } from '../../services/api-call.service';
@@ -27,7 +27,8 @@ export class LandingComponent implements OnInit {
     private router: Router,
     private apiService: ApiCallService,
     private smartApiService: SmartApiService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private ngZone: NgZone
   ) {
     this.loanForm = this.fb.group({
       firstName: ['', Validators.required],
@@ -184,7 +185,28 @@ export class LandingComponent implements OnInit {
               if (resNew && resNew?.transactionId) {
                 this.loadingService.hide();
 
-                prompt('File Generated: ', resNew?.transactionId);
+                this.apiService.getGetRequest('/getLoanHTML/' + resNew?.transactionId).subscribe(async (res: any) => {
+                  console.log(res);
+                  if (res) {
+                    console.log('Res File: ', res?.file);
+                    this.ngZone.run(() => {
+                      this.router.navigate(['/view-file'], { state: { loanHtml: res?.file } });
+                    });
+                  }
+                });
+
+                // prompt('Please Keep this ID secured for Further all document related Refrences', resNew?.transactionId);
+
+                const transactionId = resNew?.transactionId;
+                const message = `Please save this Transaction ID securely. You will need it for all future document-related references:\n\n${transactionId}`;
+                alert(message);
+
+                // Copy to clipboard
+                navigator.clipboard.writeText(transactionId).then(() => {
+                  console.log("Transaction ID copied to clipboard!");
+                }).catch(err => {
+                  console.error("Failed to copy Transaction ID:", err);
+                });
               }
             });
         }
